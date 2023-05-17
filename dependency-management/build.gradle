@@ -1,17 +1,47 @@
-apply plugin: 'java'
-
-repositories {
-    mavenCentral()
+plugins {
+    id 'org.sonatype.gradle.plugins.scan' version '2.2.3' // Update the version as needed
 }
 
+apply plugin: 'java'
+
+ repositories {
+    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+
 dependencies {
-    compile 'log4j:log4j:1.2.17'
-    testCompile 'junit:junit:4.11'
+    // runtime 'org.apache.logging.log4j:log4j-core:2.7'    
+    // compileClasspath 'org.apache.logging.log4j:log4j-core:2.10.0'
+    // testCompile 'junit:junit:4.11'
+    // compile 'com.fasterxml.jackson.core:jackson-databind:2.7.5'
+    implementation 'org.apache.logging.log4j:log4j-core:2.7'    
+    implementation 'org.apache.logging.log4j:log4j-core:2.10.0'
+    implementation 'junit:junit:4.11'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.7.5'
 }
 
 jar {
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    //from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest {
         attributes 'Main-Class': 'net.petrikainulainen.gradle.HelloWorld'
     }
+}
+
+nexusIQScan {
+    username = "${System.env.MY_IQ_USER}"
+    password = "${System.env.MY_IQ_PASS}"
+    serverUrl = "${System.env.MY_IQ_URL}"
+    applicationId = 'scan-gradle-plugin'
+    stage = 'build' // build is used if omitted
+    allConfigurations = true
+}
+
+task listrepos {
+    doLast {
+        println "Repositories:"
+        project.repositories.each { println "Name: " + it.name + "; url: " + it.url }
+   }
 }
